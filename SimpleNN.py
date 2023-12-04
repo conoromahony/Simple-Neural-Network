@@ -163,7 +163,7 @@ def test_prediction(index, W1, b1, W2, b2):
 
 # We are using the MNIST digit recognizer dataset.
 # Use pandas to read the CSV file with the data.
-data = pd.read_csv('/kaggle/input/digit-recognizer/train.csv')
+data = pd.read_csv('train.csv')
 # Use numpy to load the CSV data into an array.
 data = np.array(data)
 # Get the dimensions of the array. There are m rows (i.e. images). Each image has n (i.e. 785 values; one for the label and 784 for the pixels)
