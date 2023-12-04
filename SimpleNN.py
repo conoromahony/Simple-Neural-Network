@@ -1,9 +1,30 @@
-# Implements a simple two-layer neural network.
-# Input layer 𝑎[0] will have 784 units corresponding to the 784 pixels in each 28x28 input image. 
-# A hidden layer 𝑎[1] will have 10 units with ReLU activation, 
-# and finally our output layer 𝑎[2] will have 10 units corresponding to the ten digit classes with softmax activation.
+# Implements a simple two-layer neural network. Input layer 𝑎[0] will have 784 units corresponding to the 784 pixels in each 28x28 input image. 
+# A hidden layer 𝑎[1] will have 10 units with ReLU activation, and finally our output layer 𝑎[2] will have 10 units corresponding to the ten digit
+# classes with softmax activation.
 # Video: https://www.youtube.com/watch?v=w8yWXqWQYmU
 # Blog post: https://www.samsonzhang.com/2020/11/24/understanding-the-math-behind-neural-networks-by-building-one-from-scratch-no-tf-keras-just-numpy
+
+# This code uses Gradient Descent. The basic idea of gradient descent is to figure out what direction each parameter can go in to decrease error
+# by the greatest amount, then nudge each parameter in its corresponding direction over and over again until the parameters for minimum error and
+# highest accuracy are found. In a neural network, gradient descent is carried out via a process called backward propagation. We take a prediction,
+# calculate an error of how off it was from the actual value, then run this error backwards through the network to find out how much each weight
+# and bias parameter contributed to this error. Once we have these error derivative terms, we can nudge our weights and biases accordingly to improve
+# our model. Do it enough times, and we'll have a neural network that can recognize handwritten digits accurately.
+
+# To run:
+#  - Go to Programming > SimpleNN
+#  - Type "python SimpleNN.py"
+#  - Edit with IDLE
+#  - git commit -m "message"
+#  - git push
+
+# TODO:
+#  - Refactor the code so the number of layers is not hardcoded.
+#  - Add other activation functions.
+#  - Consider fancier architectures like CNNs.
+#  - Consider variations of gradient descent that improve training efficiency: gradient descent with momentum, RMSProp, and Adam optimization. 
+#  - Create a package for the refactored neural network code.
+#  - Create a way to visualize what's happening in the neural network.
 
 import numpy as np
 import pandas as pd
@@ -34,6 +55,9 @@ def ReLU(Z):
 
 
 # Implement the softmax function. That is, it translates the values to probabilities, between 0 and 1, that all add up to 1.
+# Softmax takes a column of data at a time, taking each element in the column and outputting the exponential of that element divided by the
+# sum of the exponentials of each of the elements in the input column.
+The value of using softmax for our output layer is that we can read the output as probabilities for certain predictions.
 def softmax(Z):
     A = np.exp(Z) / sum(np.exp(Z))
     return A
@@ -91,6 +115,8 @@ def one_hot(Y):
 def backward_prop(Z1, A1, Z2, A2, W1, W2, X, Y):
     m = Y.size
     one_hot_Y = one_hot(Y)
+    # The closer the prediction probability is to 1, the closer the loss is to 0. By minimizing the cost function, we improve the accuracy of our model.
+    # We do so by substracting the derivative of the loss function with respect to each parameter from that parameter over many rounds of graident descent.
     dZ2 = A2 - one_hot_Y
     dW2 = 1 / m * dZ2.dot(A1.T)
     db2 = 1 / m * np.sum(dZ2)
@@ -148,21 +174,22 @@ def make_predictions(X, W1, b1, W2, b2):
     return predictions
 
 
+# Test the neural network's prediction for the image at the "index" parameter.
 def test_prediction(index, W1, b1, W2, b2):
     current_image = X_train[:, index, None]
     prediction = make_predictions(X_train[:, index, None], W1, b1, W2, b2)
     label = Y_train[index]
     print("Prediction: ", prediction)
     print("Label: ", label)
-    
     current_image = current_image.reshape((28, 28)) * 255
     plt.gray()
     plt.imshow(current_image, interpolation='nearest')
     plt.show()
 
 
-# We are using the MNIST digit recognizer dataset.
-# Use pandas to read the CSV file with the data.
+# We are using the MNIST digit recognizer dataset. MNIST ("Modified National Institute of Standards and Technology") is the de facto “hello world”
+# dataset of computer vision. Since its release in 1999, this classic dataset of handwritten images has served as the basis for benchmarking
+# classification algorithms. Use pandas to read the CSV file with the data.
 data = pd.read_csv('train.csv')
 # Use numpy to load the CSV data into an array.
 data = np.array(data)
@@ -181,16 +208,25 @@ Y_dev = data_dev[0]
 X_dev = data_dev[1:n]
 X_dev = X_dev / 255.
 
-# Create the training data from the remaining images.
+# Create the training data from the remaining images. There are something like 41,000 of them.
 # Again, remember to transpose the matrix so each column is an image.
 data_train = data[1000:m].T
 Y_train = data_train[0]
 X_train = data_train[1:n]
 X_train = X_train / 255.
-_,m_train = X_train.shape
 
 # Run the neural network for 500 iterations on the training set, with an alpha of 0.1.
 W1, b1, W2, b2 = gradient_descent(X_train, Y_train, 0.10, 500)
 
 
+# Test the neural network's prediction for the images at indexes 0, 1, 2, and 3.
+test_prediction(0, W1, b1, W2, b2)
+test_prediction(1, W1, b1, W2, b2)
+test_prediction(2, W1, b1, W2, b2)
+test_prediction(3, W1, b1, W2, b2)
+
+# Let's have a look at the accuracy for the validation set.
+dev_predictions = make_predictions(X_dev, W1, b1, W2, b2)
+validation_accuracy = get_accuracy(dev_predictions, Y_dev)
+print(validation_accuracy)
 
