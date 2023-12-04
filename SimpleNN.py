@@ -1,5 +1,5 @@
 # Implements a simple two-layer neural network. Input layer 𝑎[0] will have 784 units corresponding to the 784 pixels in each 28x28 input image. 
-# A hidden layer 𝑎[1] will have 10 units with ReLU activation, and finally our output layer 𝑎[2] will have 10 units corresponding to the ten digit
+# A hidden layer 𝑎[1] will have 64 units with ReLU activation, and finally our output layer 𝑎[2] will have 10 units corresponding to the ten digit
 # classes with softmax activation.
 # Video: https://www.youtube.com/watch?v=w8yWXqWQYmU
 # Blog post: https://www.samsonzhang.com/2020/11/24/understanding-the-math-behind-neural-networks-by-building-one-from-scratch-no-tf-keras-just-numpy
@@ -35,13 +35,13 @@ from matplotlib import pyplot as plt
 # Note: it's best practice to initialize your weights/biases close to 0, otherwise your gradients get really small really quickly:
 # https://stackoverflow.com/questions/47240308/differences-between-numpy-random-rand-vs-numpy-random-randn-in-python
 def init_params():
-    # Defines the weights for the conections to the nodes in layer 1. W1 is a 10 x 784 matrix with random values.
+    # Defines the weights for the conections to the nodes in layer 1. W1 is a 64 x 784 matrix with random values.
     # We subtract 0.5 from the random values so we end up with numbers between -0.5 and 0.5 (rather than 0 and 1),
-    W1 = np.random.rand(10, 784) - 0.5
-    # Defines the biases for the nodes in layer 1. b1 is a 10 x 1 matrix with random values.
-    b1 = np.random.rand(10, 1) - 0.5
-    # Defines the weights for the conections to the nodes in layer 2. W2 is a 10 x 10 matrix with random values.
-    W2 = np.random.rand(10, 10) - 0.5
+    W1 = np.random.rand(64, 784) - 0.5
+    # Defines the biases for the nodes in layer 1. b1 is a 64 x 1 matrix with random values.
+    b1 = np.random.rand(64, 1) - 0.5
+    # Defines the weights for the conections to the nodes in layer 2. W2 is a 10 x 64 matrix with random values.
+    W2 = np.random.rand(10, 64) - 0.5
     # Defines the biases for the nodes in layer 2. W1 is a 10 x 1 matrix with random values.
     b2 = np.random.rand(10, 1) - 0.5
     return W1, b1, W2, b2
@@ -57,7 +57,6 @@ def ReLU(Z):
 # Implement the softmax function. That is, it translates the values to probabilities, between 0 and 1, that all add up to 1.
 # Softmax takes a column of data at a time, taking each element in the column and outputting the exponential of that element divided by the
 # sum of the exponentials of each of the elements in the input column.
-The value of using softmax for our output layer is that we can read the output as probabilities for certain predictions.
 def softmax(Z):
     A = np.exp(Z) / sum(np.exp(Z))
     return A
